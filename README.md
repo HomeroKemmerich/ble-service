@@ -30,9 +30,11 @@ O aplicativo para dispositivos móveis deve acessar as funcionalidades do servi�
 ## Recursos
 
 - Aplicativo móvel
-    - [Projeto](https://ai2.appinventor.mit.edu/#6597180401778688)
-    - [.apk](./files/)
+    - [Documentação](./doc/app.md)
+    - [Projeto](/files/ble_services.aia)
+    - [.apk](./files/ble_services.apk)
 - Firmware
 
 ## Instruções
 
+1. Instale o aplicativo através do arquivo [.apk](/files/ble_services.apk)
