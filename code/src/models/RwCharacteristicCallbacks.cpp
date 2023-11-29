@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <BLEDevice.h>
 
-class MyCharacteristicCallbacks : public BLECharacteristicCallbacks
+class WListCharacteristicCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite(BLECharacteristic *pCharacteristic)
     {

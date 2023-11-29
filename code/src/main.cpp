@@ -2,8 +2,9 @@
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
+#include <vector>
 
-#include "models/MyCharacteristicCallbacks.cpp"
+#include "models/RwCharacteristicCallbacks.cpp"
 #include "models/MyServerCallbacks.cpp"
 
 #include "constants/characteristics.h"
@@ -17,10 +18,10 @@
 //Descritor para a característica de notificação
 BLEDescriptor notifyDescriptor(BLEUUID((uint16_t)0x2902));
 
-BLECharacteristic *rwCharacteristic, *notifyCharacteristic;
+BLECharacteristic *rwCharacteristic, *notifyCharacteristic, *writeListCharacteristic, *readCharacteristic, *readListCharacteristic;
 
 
-int valueToBeNotified = 0;
+int valueToBeNotified = 0, listIndex = 0;
 
 void setup() {
     delay(1000);
@@ -28,6 +29,8 @@ void setup() {
     BLEServer *pServer;                 /* Objeto para o Servidor BLE */
     BLEService *pService;               /* Objeto para o Servico */
     BLEAdvertising *pAdvertising;       /* Objeto para anuncio de Servidor */
+
+    std::vector<String> values{"Primeiro valor", "Segundo valor", "Terceiro valor", "Quarto valor", "Quinto valor"};
 
     /* Servidor */
     Serial.println("Iniciando o Servidor BLE");
@@ -55,11 +58,22 @@ void setup() {
     notifyCharacteristic->setValue(valueToBeNotified);
     notifyCharacteristic->addDescriptor(&notifyDescriptor);
 
+    //Lista
+    writeListCharacteristic = pService->createCharacteristic(
+                            WRITE_LIST_CHARACTERISTIC,BLECharacteristic::PROPERTY_WRITE
+                            );
+    readCharacteristic = pService->createCharacteristic(
+                            READ_LIST_CHARACTERISTIC,BLECharacteristic::PROPERTY_READ
+                            );
+    // listCharacteristic->setValue(values);
+    
+
 
 
     /* Adicionando funções de Callback */
     // Adiciona funcionalidades de manipulação da característica
-    rwCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+    rwCharacteristic->setCallbacks(new WListCharacteristicCallbacks());
+    writeListCharacteristic->setCallbacks(new WListCharacteristicCallbacks());
 
     // Adiciona funcionalidades de manipulação do servidor
     pServer->setCallbacks(new MyServerCallbacks());
