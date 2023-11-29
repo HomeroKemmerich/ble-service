@@ -1,15 +1,3 @@
-/*
-Engenharia de Computação - UPF
-Comunicação de dados em Aplicações Embarcadas
-Marcelo Trindade Rebonatto
-28/10/2023
-Server Inicial BLE
-Adaptado de Based on Neil Kolban example for IDF: 
-    https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleServer.cpp
-    Ported to Arduino ESP32 by Evandro Copercini
-    updates by chegewara
-*/
-
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -29,7 +17,8 @@ Adaptado de Based on Neil Kolban example for IDF:
 //Descritor para a característica de notificação
 BLEDescriptor notifyDescriptor(BLEUUID((uint16_t)0x2902));
 
-BLECharacteristic *pCharacteristic; /* Objeto para uma Caracteristica */
+BLECharacteristic *rwCharacteristic, *notifyCharacteristic;
+
 
 int valueToBeNotified = 0;
 
@@ -50,18 +39,27 @@ void setup() {
     /* Criando o Serviço */
     pService = pServer->createService(SERVICE_UUID);
     
-    /* Criando e Ajustando a caracteristica */
-    pCharacteristic = pService->createCharacteristic(
-                          CHARACTERISTIC_UUID,
-                          BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE | 
-                          BLECharacteristic::PROPERTY_NOTIFY
+    //Leitura e escrita
+    rwCharacteristic = pService->createCharacteristic(
+                          RW_CHARACTERISTIC,
+                          BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE
                           );
 
-    pCharacteristic->setValue("Hello World de BLE Homero");
+    rwCharacteristic->setValue("Primeiro valor");
+
+    //Notificação
+    notifyCharacteristic = pService->createCharacteristic(
+                              NOTIFY_CHARACTERISTIC,
+                              BLECharacteristic::PROPERTY_NOTIFY
+                              );
+    notifyCharacteristic->setValue(valueToBeNotified);
+    notifyCharacteristic->addDescriptor(&notifyDescriptor);
+
+
 
     /* Adicionando funções de Callback */
     // Adiciona funcionalidades de manipulação da característica
-    pCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
+    rwCharacteristic->setCallbacks(new MyCharacteristicCallbacks());
 
     // Adiciona funcionalidades de manipulação do servidor
     pServer->setCallbacks(new MyServerCallbacks());
@@ -81,18 +79,16 @@ void setup() {
     /* Inicia o anúncio */
     BLEDevice::startAdvertising();
     Serial.println("Anuncio configurado e iniciado. Pode-se conectar e ler do Cliente");
-
-    notifyDescriptor.setValue("Valor incrementado");
-    pCharacteristic->addDescriptor(&notifyDescriptor);
 }
 
 void loop() {
     delay(random(1993, 2017));
 
-    //Comentado para o funcionamento com o aplicativo
-    //pCharacteristic->setValue(valueToBeNotified);
-    pCharacteristic->notify();
+    notifyCharacteristic->setValue(valueToBeNotified);
+    
+    if(valueToBeNotified % 5 == 0){
+        notifyCharacteristic->notify();
+    }
 
     valueToBeNotified++;
-
 }
