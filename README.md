@@ -7,6 +7,7 @@ Repositório para desenvolvimento do trabalho sobre BLE.
 - [Aluno](#aluno)
 - [Descrição](#descrição)
 - [Recursos](#recursos)
+- [Observações](#observações)
 
 ## Aluno 
 
@@ -34,7 +35,8 @@ O aplicativo para dispositivos móveis deve acessar as funcionalidades do servi�
     - [Projeto](/files/ble_services.aia)
     - [.apk](./files/ble_services.apk)
 - Firmware
+    - [Documentação](/files/documentacao_ble-services.pdf)
 
-## Instruções
+## Observações
 
-1. Instale o aplicativo através do arquivo [.apk](/files/ble_services.apk)
+Apesar de implementado via firmware, e também via aplicativo, não foi possível implementar a leitura no índice nem de notificação por razões desconhecidas.
