@@ -4,7 +4,6 @@
 #include <BLEServer.h>
 #include <vector>
 
-#include "models/RwCharacteristicCallbacks.cpp"
 #include "models/MyServerCallbacks.cpp"
 
 #include "constants/characteristics.h"
@@ -14,11 +13,28 @@
 
 #define SERVICE_UUID            "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 
+BLECharacteristic *rwCharacteristic, *notifyCharacteristic, *readNotificationCharacteristic, *writeListCharacteristic, *readListCharacteristic;
+
+class RwCharacteristicCallbacks : public BLECharacteristicCallbacks
+{
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
+        std::string value = pCharacteristic->getValue();
+        if (value.length() > 0)
+        {
+            pCharacteristic->setValue(value);
+        }
+        if(pCharacteristic == writeListCharacteristic){
+            readListCharacteristic->setValue(value);
+        }
+    }
+};
+
 
 //Descritor para a característica de notificação
 BLEDescriptor notifyDescriptor(BLEUUID((uint16_t)0x2902));
 
-BLECharacteristic *rwCharacteristic, *notifyCharacteristic, *writeListCharacteristic, *readCharacteristic, *readListCharacteristic;
+
 
 
 int valueToBeNotified = 0, listIndex = 0;
@@ -42,6 +58,7 @@ void setup() {
     /* Criando o Serviço */
     pService = pServer->createService(SERVICE_UUID);
     
+    //#region Configuração das características
     //Leitura e escrita
     rwCharacteristic = pService->createCharacteristic(
                           RW_CHARACTERISTIC,
@@ -55,6 +72,10 @@ void setup() {
                               NOTIFY_CHARACTERISTIC,
                               BLECharacteristic::PROPERTY_NOTIFY
                               );
+    readNotificationCharacteristic = pService->createCharacteristic(
+                              READ_NOTIFICATION_CHARACTERISTIC,
+                              BLECharacteristic::PROPERTY_READ
+                              );
     notifyCharacteristic->setValue(valueToBeNotified);
     notifyCharacteristic->addDescriptor(&notifyDescriptor);
 
@@ -62,23 +83,21 @@ void setup() {
     writeListCharacteristic = pService->createCharacteristic(
                             WRITE_LIST_CHARACTERISTIC,BLECharacteristic::PROPERTY_WRITE
                             );
-    readCharacteristic = pService->createCharacteristic(
+    readListCharacteristic = pService->createCharacteristic(
                             READ_LIST_CHARACTERISTIC,BLECharacteristic::PROPERTY_READ
                             );
-    // listCharacteristic->setValue(values);
+    //#endregion
     
 
 
 
     /* Adicionando funções de Callback */
-    // Adiciona funcionalidades de manipulação da característica
-    rwCharacteristic->setCallbacks(new WListCharacteristicCallbacks());
-    writeListCharacteristic->setCallbacks(new WListCharacteristicCallbacks());
+    rwCharacteristic->setCallbacks(new RwCharacteristicCallbacks());
+    writeListCharacteristic->setCallbacks(new RwCharacteristicCallbacks());
 
     // Adiciona funcionalidades de manipulação do servidor
     pServer->setCallbacks(new MyServerCallbacks());
 
-    Serial.println("Caracteristica definida!");
 
     /* Iniciando o Servico */
     pService->start();
@@ -97,10 +116,9 @@ void setup() {
 
 void loop() {
     delay(random(1993, 2017));
-
-    notifyCharacteristic->setValue(valueToBeNotified);
     
     if(valueToBeNotified % 5 == 0){
+        readNotificationCharacteristic->setValue(valueToBeNotified);
         notifyCharacteristic->notify();
     }
 
