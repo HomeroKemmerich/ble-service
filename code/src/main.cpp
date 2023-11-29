@@ -15,6 +15,8 @@
 
 BLECharacteristic *rwCharacteristic, *notifyCharacteristic, *readNotificationCharacteristic, *writeListCharacteristic, *readListCharacteristic;
 
+std::vector<String> values{"Primeiro valor", "Segundo valor", "Terceiro valor", "Quarto valor", "Quinto valor", "Sexto valor", "Setimo valor", "Oitavo valor", "Nono valor", "Decimo valor"};
+
 class RwCharacteristicCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite(BLECharacteristic *pCharacteristic)
@@ -25,7 +27,7 @@ class RwCharacteristicCallbacks : public BLECharacteristicCallbacks
             pCharacteristic->setValue(value);
         }
         if(pCharacteristic == writeListCharacteristic){
-            readListCharacteristic->setValue(value);
+            readListCharacteristic->setValue(values[(int)value]);
         }
     }
 };
@@ -45,8 +47,6 @@ void setup() {
     BLEServer *pServer;                 /* Objeto para o Servidor BLE */
     BLEService *pService;               /* Objeto para o Servico */
     BLEAdvertising *pAdvertising;       /* Objeto para anuncio de Servidor */
-
-    std::vector<String> values{"Primeiro valor", "Segundo valor", "Terceiro valor", "Quarto valor", "Quinto valor"};
 
     /* Servidor */
     Serial.println("Iniciando o Servidor BLE");
